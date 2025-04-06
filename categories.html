@@ -1,0 +1,86 @@
+<!-- categories.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="./categories.css">
+  <title>Categories</title>
+</head>
+<body>
+  <div class="header">
+    <div class="left">
+      <h2>Male fashion <p>.</p></h2>
+    </div>
+    <div class="right">
+      <a href="home.html"><p>Home</p></a>
+      <a href="basket.html"><p>Basket</p></a>
+      <a href="categories.html"><p>Categories</p></a>
+      <a href="contact.html"><p>Contact</p></a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Categories</h2>
+    <div>
+      <input type="text" id="titleInput" placeholder="Title">
+      <input type="text" id="descriptionInput" placeholder="Description">
+      <button onclick="addCategory()">Göndər</button>
+    </div>
+    <div id="categoryList"></div>
+  </div>
+
+  <script>
+    const apiUrl = 'https://northwind.vercel.app/api/categories';
+
+    function fetchCategories() {
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('categoryList');
+          list.innerHTML = '';
+          data.forEach(cat => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+              <h3>${cat.name}</h3>
+              <p>${cat.description}</p>
+              <button onclick="deleteCategory(${cat.id})">Sil</button>
+            `;
+            list.appendChild(div);
+          });
+        });
+    }
+
+    function deleteCategory(id) {
+      fetch(`${apiUrl}/${id}`, {
+        method: 'DELETE'
+      })
+      .then(() => fetchCategories());
+    }
+
+    function addCategory() {
+      const title = document.getElementById('titleInput').value;
+      const description = document.getElementById('descriptionInput').value;
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: title,
+          description: description
+        })
+      })
+      .then(() => {
+        document.getElementById('titleInput').value = '';
+        document.getElementById('descriptionInput').value = '';
+        fetchCategories();
+      });
+    }
+
+    window.onload = fetchCategories;
+  </script>
+</body>
+</html>
